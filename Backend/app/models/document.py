@@ -39,12 +39,12 @@ class Document(Base):
         nullable=False
     )
 
+    extracted_text = Column(
+        Text,
+        nullable=True
+    )
+
     uploaded_at = Column(
         DateTime,
         default=datetime.utcnow
     )
-
-    extracted_text = Column(
-    Text,
-    nullable=True
-)
