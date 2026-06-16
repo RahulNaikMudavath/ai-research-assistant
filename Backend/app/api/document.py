@@ -19,6 +19,14 @@ from app.auth.dependencies import (
     get_current_user
 )
 
+from app.services.chunk_service import (
+    chunk_text
+)
+
+from app.models.document_chunk import (
+    DocumentChunk
+)
+
 from app.models.user import User
 
 router = APIRouter()
@@ -78,6 +86,23 @@ def upload_document(
     db.commit()
 
     db.refresh(document)
+    if extracted_text:
+
+        chunks = chunk_text(
+        extracted_text
+    )
+
+    for index, chunk in enumerate(chunks):
+
+        document_chunk = DocumentChunk(
+            document_id=document.id,
+            chunk_index=index,
+            chunk_text=chunk
+        )
+
+        db.add(document_chunk)
+
+    db.commit()
     return {
         "document_id": str(document.id),
         "filename": document.filename,
@@ -104,4 +129,27 @@ def get_document(
             document.extracted_text[:1000]
             if document.extracted_text
             else None
+    }
+
+@router.get("/{document_id}/chunks")
+def get_document_chunks(
+    document_id: str,
+    db: Session = Depends(get_db)
+):
+
+    chunks = db.query(
+        DocumentChunk
+    ).filter(
+        DocumentChunk.document_id == document_id
+    ).all()
+
+    return {
+        "total_chunks": len(chunks),
+        "chunks": [
+            {
+                "index": chunk.chunk_index,
+                "preview": chunk.chunk_text[:200]
+            }
+            for chunk in chunks
+        ]
     }
