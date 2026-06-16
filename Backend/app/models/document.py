@@ -4,13 +4,13 @@ from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
+from sqlalchemy import Text
 
 from sqlalchemy.dialects.postgresql import UUID
 
 from datetime import datetime
 
 from app.database.base import Base
-from fastapi import APIRouter
 
 
 class Document(Base):
@@ -44,12 +44,7 @@ class Document(Base):
         default=datetime.utcnow
     )
 
-
-router = APIRouter()
-
-@router.get("/test")
-def test_document():
-
-    return {
-        "message": "Document API Working"
-    }
+    extracted_text = Column(
+    Text,
+    nullable=True
+)
