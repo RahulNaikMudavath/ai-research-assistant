@@ -1,20 +1,23 @@
 # Python
 
-backend/venv/
+Backend/venv/
 __pycache__/
 *.pyc
 
 # Environment
 
 .env
+.env.*
+!/.env.example
+
 
 # Uploads
 
-uploads/
+Backend/uploads/
 
 # Node
 
-frontend/node_modules/
+frontned/node_modules/
 
 # VS Code
 
