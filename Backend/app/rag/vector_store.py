@@ -48,7 +48,8 @@ def search_vectors(
     for idx in indices[0]:
 
         if (
-            idx < len(chunk_metadata)
+            idx >= 0
+            and idx < len(chunk_metadata)
             and idx not in seen
         ):
 
@@ -58,7 +59,7 @@ def search_vectors(
 
             seen.add(idx)
 
-        elif idx >= len(chunk_metadata):
+        else:
 
             print(
                 f"WARNING: Invalid FAISS index {idx}. "

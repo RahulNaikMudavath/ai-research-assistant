@@ -19,7 +19,8 @@ def ask_question(
 ):
 
     chunks = retrieve_relevant_chunks(
-        request.question
+        request.question,
+        request.document_id
     )
 
     context = "\n\n".join(
@@ -39,6 +40,7 @@ def ask_question(
         "answer": answer,
         "sources": [
             {
+                "filename": item.get("filename"),
                 "chunk_index": item["chunk_index"],
                 "preview": item["chunk_text"][:200]
             }
