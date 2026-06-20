@@ -189,3 +189,20 @@ def get_document_chunks(
             for chunk in chunks
         ]
     }
+
+@router.get("/")
+def get_all_documents(
+    db: Session = Depends(get_db)
+):
+
+    documents = db.query(
+        Document
+    ).all()
+
+    return [
+        {
+            "id": str(doc.id),
+            "filename": doc.filename
+        }
+        for doc in documents
+    ]
