@@ -114,13 +114,15 @@ def upload_document(
             )
 
             add_embedding(
-                embedding,
-                {
-                    "document_id": str(document.id),
-                    "chunk_index": index,
-                    "chunk_text": chunk
-                }
-            )
+            embedding,
+        {
+            "document_id": str(document.id),
+            "filename": document.filename,
+            "chunk_index": index,
+            "chunk_text": chunk
+        }
+    )
+    
 
         db.commit()
 
@@ -139,7 +141,6 @@ def faiss_stats():
     return {
         "vectors": index.ntotal
     }
-
 
 @router.get("/{document_id}")
 def get_document(

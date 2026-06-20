@@ -43,13 +43,26 @@ def search_vectors(
     )
 
     results = []
+    seen = set()
 
     for idx in indices[0]:
 
-        if idx < len(chunk_metadata):
+        if (
+            idx < len(chunk_metadata)
+            and idx not in seen
+        ):
 
             results.append(
                 chunk_metadata[idx]
+            )
+
+            seen.add(idx)
+
+        elif idx >= len(chunk_metadata):
+
+            print(
+                f"WARNING: Invalid FAISS index {idx}. "
+                f"Metadata size = {len(chunk_metadata)}"
             )
 
     return results

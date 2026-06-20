@@ -19,16 +19,24 @@ def generate_answer(
 ):
 
     prompt = f"""
-    Use ONLY the provided context to answer.
+You are an AI Research Assistant.
 
-    Context:
-    {context}
+Answer ONLY using the provided context.
 
-    Question:
-    {question}
+Format the answer clearly using:
+- Headings
+- Bullet points
+- Numbered lists
 
-    Give a clear and structured answer.
-    """
+If the answer contains multiple items,
+group them logically.
+
+Context:
+{context}
+
+Question:
+{question}
+"""
 
     response = model.generate_content(
         prompt
