@@ -10,6 +10,7 @@ from app.rag.vector_store import (
 def retrieve_relevant_chunks(
     question,
     document_id=None,
+    user_id=None,
     k=5
 ):
 
@@ -21,6 +22,14 @@ def retrieve_relevant_chunks(
         question_embedding,
         k=20
     )
+
+    if user_id:
+
+        results = [
+            item
+            for item in results
+            if item.get("user_id") == user_id
+        ]
 
     if document_id:
 

@@ -2,10 +2,19 @@ from jose import jwt
 from datetime import datetime
 from datetime import timedelta
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from jose import JWTError
-from jose import jwt
+
+env_path = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(env_path)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY is not set. Please add it to Backend/.env or your environment."
+    )
+
 ALGORITHM = "HS256"
 
 def create_access_token(data: dict):

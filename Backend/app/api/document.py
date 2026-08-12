@@ -31,7 +31,9 @@ from app.services.embedding_service import (
 )
 
 from app.rag.vector_store import (
-    add_embedding
+    add_embedding,
+    save_index,
+    chunk_metadata
 )
 
 router = APIRouter()
@@ -114,17 +116,19 @@ def upload_document(
             )
 
             add_embedding(
-            embedding,
-        {
-            "document_id": str(document.id),
-            "filename": document.filename,
-            "chunk_index": index,
-            "chunk_text": chunk
-        }
-    )
-    
+                embedding,
+                {
+                    "document_id": str(document.id),
+                    "user_id": str(current_user.id),
+                    "filename": document.filename,
+                    "chunk_index": index,
+                    "chunk_text": chunk
+                }
+            )
 
         db.commit()
+
+        save_index()
 
     return {
         "document_id": str(document.id),
@@ -134,22 +138,35 @@ def upload_document(
 
 
 @router.get("/faiss-stats")
-def faiss_stats():
+def faiss_stats(
+    current_user: User = Depends(
+        get_current_user
+    )
+):
 
-    from app.rag.vector_store import index
+    from app.rag.vector_store import chunk_metadata
+
+    user_vectors = len([
+        item for item in chunk_metadata
+        if item.get("user_id") == str(current_user.id)
+    ])
 
     return {
-        "vectors": index.ntotal
+        "vectors": user_vectors
     }
 
 @router.get("/{document_id}")
 def get_document(
     document_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    )
 ):
 
     document = db.query(Document).filter(
-        Document.id == document_id
+        Document.id == document_id,
+        Document.user_id == current_user.id
     ).first()
 
     if not document:
@@ -170,8 +187,21 @@ def get_document(
 @router.get("/{document_id}/chunks")
 def get_document_chunks(
     document_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    )
 ):
+
+    document = db.query(Document).filter(
+        Document.id == document_id,
+        Document.user_id == current_user.id
+    ).first()
+
+    if not document:
+        return {
+            "message": "Document not found"
+        }
 
     chunks = db.query(
         DocumentChunk
@@ -192,11 +222,16 @@ def get_document_chunks(
 
 @router.get("/")
 def get_all_documents(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    )
 ):
 
     documents = db.query(
         Document
+    ).filter(
+        Document.user_id == current_user.id
     ).all()
 
     return [

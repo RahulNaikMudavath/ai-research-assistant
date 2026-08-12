@@ -1,6 +1,9 @@
 from fastapi import APIRouter
+from fastapi import Depends
 
 from app.schemas.chat import ChatRequest
+from app.models.user import User
+from app.auth.dependencies import get_current_user
 
 from app.services.retrieval_service import (
     retrieve_relevant_chunks
@@ -15,20 +18,22 @@ router = APIRouter()
 
 @router.post("/ask")
 def ask_question(
-    request: ChatRequest
+    request: ChatRequest,
+    current_user: User = Depends(get_current_user)
 ):
 
     chunks = retrieve_relevant_chunks(
         request.question,
-        request.document_id
+        request.document_id,
+        str(current_user.id)
     )
 
     context = "\n\n".join(
-        [
-            chunk["chunk_text"]
-            for chunk in chunks
-        ]
-    )
+    [
+        f"Source: {chunk['filename']}\n{chunk['chunk_text']}"
+        for chunk in chunks
+    ]
+)
 
     answer = generate_answer(
         request.question,
@@ -40,10 +45,11 @@ def ask_question(
         "answer": answer,
         "sources": [
             {
-                "filename": item.get("filename"),
-                "chunk_index": item["chunk_index"],
-                "preview": item["chunk_text"][:200]
-            }
+    "filename": item["filename"],
+    "chunk_index": item["chunk_index"],
+    "preview": item["chunk_text"][:200]
+}
+
             for item in chunks
         ]
     }
