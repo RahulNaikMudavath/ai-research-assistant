@@ -80,11 +80,33 @@ frontned/
 - Python 3.11+ (recommended)
 - `pip`
 
-### Install dependencies
+### Virtual Environment Setup & Installation
 
+It is highly recommended to install dependencies inside a virtual environment:
+
+#### 1. Create a virtual environment
 ```bash
 cd Backend
-python -m pip install -r requirements.txt
+python -m venv venv
+```
+
+#### 2. Activate the virtual environment
+- **Windows (PowerShell):**
+  ```powershell
+  .\venv\Scripts\Activate.ps1
+  ```
+- **Windows (Command Prompt):**
+  ```cmd
+  .\venv\Scripts\activate.bat
+  ```
+- **macOS / Linux:**
+  ```bash
+  source venv/bin/activate
+  ```
+
+#### 3. Install packages
+```bash
+pip install -r requirements.txt
 ```
 
 ### Environment Variables
@@ -103,17 +125,19 @@ DATABASE_URL=sqlite:///./ai_research_assistant.db
 
 ### Initialize the database
 
+With the virtual environment activated:
 ```bash
-cd Backend
 python -m app.database.init_db
 ```
+*(Alternatively, run `.\venv\Scripts\python -m app.database.init_db` on Windows or `./venv/bin/python -m app.database.init_db` on macOS/Linux without activation)*
 
 ### Start the backend
 
+With the virtual environment activated:
 ```bash
-cd Backend
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
+*(Alternatively, run `.\venv\Scripts\uvicorn main:app --reload --host 0.0.0.0 --port 8000` on Windows or `./venv/bin/uvicorn main:app --reload --host 0.0.0.0 --port 8000` on macOS/Linux without activation)*
 
 
 ## 🌐 Frontend Setup
@@ -213,12 +237,22 @@ The frontend will typically be available at `http://localhost:5173`.
 
 ## 📌 Useful Commands
 
-```bash
-# Backend
+### Running Backend (Windows)
+With or without virtual environment activation:
+```powershell
 cd Backend
-uvicorn main:app --reload
+.\venv\Scripts\uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-# Frontend
+### Running Backend (macOS/Linux)
+With or without virtual environment activation:
+```bash
+cd Backend
+./venv/bin/uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Running Frontend
+```bash
 cd frontned
 npm run dev
 ```
