@@ -14,8 +14,9 @@ This repository contains two main folders:
 - User registration and login with JWT authentication
 - PDF upload and text extraction
 - Document chunking for vector retrieval
-- Sentence-transformer embeddings with FAISS vector search
-- Gemini API powered answer generation using uploaded document context
+- Sentence-transformer embeddings with FAISS vector search (with clamped cosine similarity confidence scores)
+- Gemini API powered answer generation using uploaded document context with token & estimated cost tracking
+- Database-backed query analytics and cumulative statistics dashboard (Total Queries & Est. LLM Cost)
 - Document listing, preview, and chunk metadata retrieval
 - Simple, CORS-enabled backend for browser-based frontend usage
 
@@ -176,7 +177,11 @@ The frontend will typically be available at `http://localhost:5173`.
 - `POST /chat/ask`
   - Requires authenticated user.
   - Request body: `question`, optional `document_id`
-  - Returns a generated answer plus source previews.
+  - Returns a generated answer, source previews (including confidence scores), and query token/cost usage metadata.
+
+- `GET /chat/analytics`
+  - Requires authenticated user.
+  - Returns aggregated usage analytics for the user (total queries, total prompt/completion tokens, and total estimated API cost).
 
 ## 🧠 Backend Components
 
