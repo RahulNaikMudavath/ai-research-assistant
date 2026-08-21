@@ -35,3 +35,8 @@ class DocumentChunk(Base):
         Text,
         nullable=False
     )
+
+    page_number = Column(
+        Integer,
+        nullable=True
+    )

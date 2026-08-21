@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi import UploadFile
 from fastapi import File
 from fastapi import Depends
+from fastapi.responses import FileResponse
 
 import shutil
 import os
@@ -74,13 +75,12 @@ def upload_document(
             buffer
         )
 
+    extracted_pages = None
     extracted_text = None
 
     if file.filename.lower().endswith(".pdf"):
-
-        extracted_text = extract_text_from_pdf(
-            file_path
-        )
+        extracted_pages = extract_text_from_pdf(file_path)
+        extracted_text = "\n".join([page_text for _, page_text in extracted_pages])
 
     document = Document(
         user_id=current_user.id,
@@ -90,44 +90,41 @@ def upload_document(
     )
 
     db.add(document)
-
     db.commit()
-
     db.refresh(document)
 
-    if extracted_text:
+    if extracted_pages:
+        global_chunk_idx = 0
+        for page_num, page_text in extracted_pages:
+            if not page_text.strip():
+                continue
+            
+            page_chunks = chunk_text(page_text)
+            
+            for chunk in page_chunks:
+                document_chunk = DocumentChunk(
+                    document_id=document.id,
+                    chunk_index=global_chunk_idx,
+                    chunk_text=chunk,
+                    page_number=page_num
+                )
+                db.add(document_chunk)
 
-        chunks = chunk_text(
-            extracted_text
-        )
-
-        for index, chunk in enumerate(chunks):
-
-            document_chunk = DocumentChunk(
-                document_id=document.id,
-                chunk_index=index,
-                chunk_text=chunk
-            )
-
-            db.add(document_chunk)
-
-            embedding = create_embedding(
-                chunk
-            )
-
-            add_embedding(
-                embedding,
-                {
-                    "document_id": str(document.id),
-                    "user_id": str(current_user.id),
-                    "filename": document.filename,
-                    "chunk_index": index,
-                    "chunk_text": chunk
-                }
-            )
+                embedding = create_embedding(chunk)
+                add_embedding(
+                    embedding,
+                    {
+                        "document_id": str(document.id),
+                        "user_id": str(current_user.id),
+                        "filename": document.filename,
+                        "chunk_index": global_chunk_idx,
+                        "chunk_text": chunk,
+                        "page_number": page_num
+                    }
+                )
+                global_chunk_idx += 1
 
         db.commit()
-
         save_index()
 
     return {
@@ -241,3 +238,27 @@ def get_all_documents(
         }
         for doc in documents
     ]
+
+
+@router.get("/{document_id}/file")
+def get_document_file(
+    document_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    document = db.query(Document).filter(
+        Document.id == document_id,
+        Document.user_id == current_user.id
+    ).first()
+
+    if not document:
+        return {"message": "Document not found"}
+
+    if not os.path.exists(document.file_path):
+        return {"message": "File not found on disk"}
+
+    return FileResponse(
+        document.file_path,
+        media_type="application/pdf",
+        filename=document.filename
+    )

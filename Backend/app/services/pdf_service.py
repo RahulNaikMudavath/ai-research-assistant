@@ -5,10 +5,10 @@ def extract_text_from_pdf(pdf_path):
 
     doc = fitz.open(pdf_path)
 
-    text = ""
+    pages = []
 
-    for page in doc:
+    for page_num, page in enumerate(doc, start=1):
 
-        text += page.get_text()
+        pages.append((page_num, page.get_text()))
 
-    return text
+    return pages

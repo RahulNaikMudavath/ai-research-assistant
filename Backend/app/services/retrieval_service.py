@@ -5,6 +5,7 @@ from app.services.embedding_service import (
 from app.rag.vector_store import (
     search_vectors
 )
+from app.rag import vector_store
 
 
 def retrieve_relevant_chunks(
@@ -13,14 +14,20 @@ def retrieve_relevant_chunks(
     user_id=None,
     k=5
 ):
+    if vector_store.index.ntotal == 0:
+        return []
 
     question_embedding = create_embedding(
         question
     )
 
+    # If filtering by a specific document, search all vectors to guarantee we find its chunks.
+    # Otherwise, search a default candidate pool (e.g., min of 20 or index.ntotal).
+    search_k = vector_store.index.ntotal if document_id else min(20, vector_store.index.ntotal)
+
     results = search_vectors(
         question_embedding,
-        k=20
+        k=search_k
     )
 
     if user_id:
