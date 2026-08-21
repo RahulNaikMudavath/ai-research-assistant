@@ -50,4 +50,29 @@ Question:
         prompt
     )
 
-    return response.text
+    usage = {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "estimated_cost": 0.0
+    }
+
+    if hasattr(response, "usage_metadata") and response.usage_metadata:
+        p_tok = getattr(response.usage_metadata, "prompt_token_count", 0)
+        c_tok = getattr(response.usage_metadata, "candidates_token_count", 0)
+        t_tok = getattr(response.usage_metadata, "total_token_count", 0)
+        
+        # Cost Calculation for Gemini 2.5 Flash:
+        # Input/Prompt: $0.30 per 1M tokens ($0.00000030 per token)
+        # Output/Completion: $2.50 per 1M tokens ($0.00000250 per token)
+        estimated_cost = (p_tok * 0.00000030) + (c_tok * 0.00000250)
+        
+        usage["prompt_tokens"] = p_tok
+        usage["completion_tokens"] = c_tok
+        usage["total_tokens"] = t_tok
+        usage["estimated_cost"] = round(estimated_cost, 6)
+
+    return {
+        "text": response.text,
+        "usage": usage
+    }

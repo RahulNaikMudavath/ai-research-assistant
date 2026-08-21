@@ -29,13 +29,18 @@ def search_vectors(embedding, k=5):
     results = []
     seen = set()
 
-    for idx in indices[0]:
+    for idx, dist in zip(indices[0], distances[0]):
 
         if idx == -1:
             continue
 
         if idx < len(chunk_metadata) and idx not in seen:
-            results.append(chunk_metadata[idx])
+            metadata = chunk_metadata[idx].copy()
+            # Convert squared L2 distance to cosine similarity for normalized vectors
+            score = max(0.0, min(1.0, 1.0 - (float(dist) / 2.0)))
+            metadata["score"] = score
+            metadata["distance"] = float(dist)
+            results.append(metadata)
             seen.add(idx)
 
     return results
