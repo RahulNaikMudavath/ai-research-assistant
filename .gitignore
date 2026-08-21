@@ -29,4 +29,8 @@ frontned/node_modules/
 Thumbs.db
 
 # Logs
-*.log
+*.log
+
+# Local databases / indexes
+Backend/metadata.json
+Backend/vectors.json

@@ -282,11 +282,11 @@ const Chat = ({ onChatSuccess }) => {
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
-              className="bg-gray-100 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 font-semibold cursor-pointer max-w-xs truncate"
+              className="bg-gray-100 dark:bg-[#161821] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500 font-semibold cursor-pointer max-w-xs truncate"
             >
-              <option value="">Search All Documents</option>
+              <option value="" className="bg-white dark:bg-[#161821] text-gray-800 dark:text-white">Search All Documents</option>
               {documents.map((doc) => (
-                <option key={doc.id} value={doc.id}>
+                <option key={doc.id} value={doc.id} className="bg-white dark:bg-[#161821] text-gray-800 dark:text-white">
                   Only: {doc.filename}
                 </option>
               ))}
